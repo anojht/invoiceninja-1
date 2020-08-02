@@ -47,10 +47,10 @@ class AccountRepository
             if (Input::get('utm_campaign')) {
                 if (env('PROMO_CAMPAIGN') && hash_equals(Input::get('utm_campaign'), env('PROMO_CAMPAIGN'))) {
                     $company->applyDiscount(.75);
-                }
-
-                if (env('PARTNER_CAMPAIGN') && hash_equals(Input::get('utm_campaign'), env('PARTNER_CAMPAIGN'))) {
+                } elseif (env('PARTNER_CAMPAIGN') && hash_equals(Input::get('utm_campaign'), env('PARTNER_CAMPAIGN'))) {
                     $company->applyFreeYear();
+                } elseif (env('EDUCATION_CAMPAIGN') && hash_equals(Input::get('utm_campaign'), env('EDUCATION_CAMPAIGN'))) {
+                    $company->applyFreeYear(2);
                 }
             } else {
                 //$company->applyDiscount(.5);
@@ -138,19 +138,17 @@ class AccountRepository
             return;
         }
 
+        // Checkout.com
+        if ($ip == '80.227.4.234') {
+            return;
+        }
+
         $count = Account::whereIp($ip)->whereHas('users', function ($query) {
             $query->whereRegistered(true);
         })->count();
 
-        if ($count > 10 && $errorEmail = env('ERROR_EMAIL')) {
-            \Mail::raw($ip, function ($message) use ($ip, $errorEmail) {
-                $message->to($errorEmail)
-                        ->from(CONTACT_EMAIL)
-                        ->subject('Duplicate company for IP: ' . $ip);
-            });
-            if ($count >= 15) {
-                abort();
-            }
+        if ($count >= 15) {
+            abort();
         }
     }
 

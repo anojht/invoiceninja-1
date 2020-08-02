@@ -135,7 +135,7 @@ class PaymentMethod extends EntityModel
     public function scopeClientId($query, $clientId)
     {
         $query->whereHas('contact', function ($query) use ($clientId) {
-            $query->whereClientId($clientId);
+            $query->withTrashed()->whereClientId($clientId);
         });
     }
 
@@ -173,7 +173,7 @@ class PaymentMethod extends EntityModel
             return $cached == false ? null : $cached;
         }
 
-        $dataPath = base_path('vendor/gatepay/FedACHdir/FedACHdir.txt');
+        $dataPath = base_path('app/Ninja/PaymentDrivers/FedACHdir.txt');
 
         if (! file_exists($dataPath) || ! $size = filesize($dataPath)) {
             return 'Invalid data file';
@@ -255,7 +255,7 @@ class PaymentMethod extends EntityModel
 
 PaymentMethod::deleting(function ($paymentMethod) {
     $accountGatewayToken = $paymentMethod->account_gateway_token;
-    if ($accountGatewayToken->default_payment_method_id == $paymentMethod->id) {
+    if ($accountGatewayToken && $accountGatewayToken->default_payment_method_id == $paymentMethod->id) {
         $newDefault = $accountGatewayToken->payment_methods->first(function ($paymentMethdod) use ($accountGatewayToken) {
             return $paymentMethdod->id != $accountGatewayToken->default_payment_method_id;
         });

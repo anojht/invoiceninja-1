@@ -91,7 +91,7 @@ class InvoiceTransformer extends EntityTransformer
             'amount' => (float) $invoice->amount,
             'balance' => (float) $invoice->balance,
             'client_id' => (int) ($this->client ? $this->client->public_id : $invoice->client->public_id),
-            'invoice_status_id' => (int) $invoice->invoice_status_id,
+            'invoice_status_id' => (int) ($invoice->invoice_status_id ?: 1),
             'updated_at' => $this->getTimestamp($invoice->updated_at),
             'archived_at' => $this->getTimestamp($invoice->deleted_at),
             'invoice_number' => $invoice->is_recurring ? '' : $invoice->invoice_number,
@@ -122,6 +122,7 @@ class InvoiceTransformer extends EntityTransformer
             'partial_due_date' => $invoice->partial_due_date ?: '',
             'has_tasks' => (bool) $invoice->has_tasks,
             'auto_bill' => (bool) $invoice->auto_bill,
+            'auto_bill_id' => (int) $invoice->auto_bill,
             'custom_value1' => (float) $invoice->custom_value1,
             'custom_value2' => (float) $invoice->custom_value2,
             'custom_taxes1' => (bool) $invoice->custom_taxes1,
@@ -133,6 +134,7 @@ class InvoiceTransformer extends EntityTransformer
             'is_quote' => (bool) $invoice->isType(INVOICE_TYPE_QUOTE), // Temp to support mobile app
             'is_public' => (bool) $invoice->is_public,
             'filename' => $invoice->getFileName(),
+            'invoice_design_id' => (int) $invoice->invoice_design_id,
         ]);
     }
 }

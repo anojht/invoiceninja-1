@@ -67,7 +67,7 @@ class CheckData extends Command
     protected $log = '';
     protected $isValid = true;
 
-    public function fire()
+    public function handle()
     {
         $this->logMessage(date('Y-m-d h:i:s') . ' Running CheckData...');
 
@@ -87,11 +87,11 @@ class CheckData extends Command
         $this->checkClientBalances();
         $this->checkContacts();
         $this->checkUserAccounts();
-        $this->checkLogoFiles();
+        //$this->checkLogoFiles();
 
         if (! $this->option('client_id')) {
             $this->checkOAuth();
-            $this->checkInvitations();
+            //$this->checkInvitations();
             $this->checkAccountData();
             $this->checkLookupData();
             $this->checkFailedJobs();
@@ -130,6 +130,7 @@ class CheckData extends Command
                     $this->logMessage($language->locale . ' is invalid: ' . $text);
                 }
 
+                /*
                 preg_match('/(.script)/', strtolower($text), $matches);
                 if (count($matches)) {
                     foreach ($matches as $match) {
@@ -141,6 +142,7 @@ class CheckData extends Command
                         break;
                     }
                 }
+                */
             }
         }
 
@@ -427,7 +429,7 @@ class CheckData extends Command
         $queueDB = config('queue.connections.database.connection');
         $count = DB::connection($queueDB)->table('failed_jobs')->count();
 
-        if ($count > 0) {
+        if ($count > 25) {
             $this->isValid = false;
         }
 
@@ -676,6 +678,8 @@ class CheckData extends Command
 
         foreach ($clients as $client) {
             $this->logMessage("=== Company: {$client->company_id} Account:{$client->account_id} Client:{$client->id} Balance:{$client->balance} Actual Balance:{$client->actual_balance} ===");
+
+            /*
             $foundProblem = false;
             $lastBalance = 0;
             $lastAdjustment = 0;
@@ -838,6 +842,7 @@ class CheckData extends Command
                     ->where('id', $client->id)
                     ->update($data);
             }
+            */
         }
     }
 
